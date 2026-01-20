@@ -5,6 +5,9 @@ A place to write your findings and plans
 2. Line 17: This is the fixed speed of the green square we control.
 3. Line 20-21: This is for the size of the green square the player controls and the size of the
    circle that represents the treasure.
+4. Line 24-27: Full bounds of the screen, the minimum and maximum for the display.
+5. Line 30: The maximum amount of pixels used to display the score as an integer.
+6. Line 33-34: Code for the location of the score on the screen. In this case it's at the top right.
 
 ## Planning required changes
 
