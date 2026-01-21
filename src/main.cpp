@@ -12,6 +12,10 @@
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
 #include "common_fixed_8x16_font.h"
+#include <bn_backdrop.h>
+#include <bn_color.h>
+
+
 
 // Pixels / Frame player moves at
 static constexpr bn::fixed SPEED = 2;
@@ -38,6 +42,8 @@ int main()
     bn::core::init();
 
     bn::random rng = bn::random();
+
+     bn::backdrop::set_color(bn::color(10, 10, 22));
 
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
