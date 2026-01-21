@@ -21,6 +21,8 @@ A place to write your findings and plans
 ## Planning required changes
 1. At Line 17, we can change the fixed speed integer to change the speed of the player.
 2. Since there's no code the background color, we'll implement it ourselves in the main file.
+3. Make new static constexpr int variables for the x and y coordinates of the player and treasure
+   and add them in the parentheses of the bn::sprite_ptr variables.
 
 ## Brainstorming game ideas
 
