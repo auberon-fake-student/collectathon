@@ -43,7 +43,7 @@ int main()
 
     bn::random rng = bn::random();
 
-     bn::backdrop::set_color(bn::color(10, 10, 22));
+    bn::backdrop::set_color(bn::color(10, 10, 22));
 
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
