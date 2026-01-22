@@ -72,35 +72,10 @@ int main()
 
     while (true)
     {
-        
-        if (bn::keypad::left_held()) {
-            player.set_x(player.x() - SPEED);
-        }
-        if (bn::keypad::right_held()) {
-            player.set_x(player.x() + SPEED);
-        }
-        if (bn::keypad::up_held()) {
-            player.set_y(player.y() - SPEED);
-        }
-        if (bn::keypad::down_held()) {
-            player.set_y(player.y() + SPEED);
-        }
-        
-        // Resets the game
-        if (bn::keypad::start_pressed()) {
-            player.set_x(PLAYER_X);
-            player.set_y(PLAYER_Y);
-            treasure.set_x(TREASURE_X);
-            treasure.set_y(TREASURE_Y);
-            score = 0;
-            aPressed = 0;
-        }
-
-        // Adds a speed boost
         if (bn::keypad::a_pressed() && aPressed != 3) {
             aPressed++;
-            timer = 0;
-            while (timer != 3) {
+            while (timer != 5) {
+                timer++;
                 if (bn::keypad::left_held()) {
                     player.set_x(player.x() - BOOST);
                 }
@@ -113,8 +88,34 @@ int main()
                 if (bn::keypad::down_held()) {
                     player.set_y(player.y() + BOOST);
                 }
-                timer++;
             }
+            timer = 0;
+        }
+
+        if (timer == 0) {
+            // Move with the d-pad
+            if (bn::keypad::left_held()) {
+                player.set_x(player.x() - SPEED);
+            }
+            if (bn::keypad::right_held()) {
+                player.set_x(player.x() + SPEED);
+            }
+            if (bn::keypad::up_held()) {
+                player.set_y(player.y() - SPEED);
+            }
+            if (bn::keypad::down_held()) {
+                player.set_y(player.y() + SPEED);
+            }
+        }
+        
+        // Resets the game
+        if (bn::keypad::start_pressed()) {
+            player.set_x(PLAYER_X);
+            player.set_y(PLAYER_Y);
+            treasure.set_x(TREASURE_X);
+            treasure.set_y(TREASURE_Y);
+            score = 0;
+            aPressed = 0;
         }
             
         // The bounding boxes of the player and treasure, snapped to integer pixels
