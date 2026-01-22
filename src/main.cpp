@@ -20,6 +20,9 @@
 // Pixels / Frame player moves at
 static constexpr bn::fixed SPEED = 2;
 
+// Pixels / Frame player moves at with speed boost
+static constexpr bn::fixed BOOST = 4;
+
 // Width and height of the the player and treasure bounding boxes
 static constexpr bn::size PLAYER_SIZE = {8, 8};
 static constexpr bn::size TREASURE_SIZE = {8, 8};
@@ -63,34 +66,57 @@ int main()
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(PLAYER_X, PLAYER_Y);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(TREASURE_X, TREASURE_Y);
 
+    // For the speed boost
+    int timer = 0;
+    int aPressed = 0;
+
     while (true)
     {
-        // Move player with d-pad
-        if (bn::keypad::left_held())
-        {
+        
+        if (bn::keypad::left_held()) {
             player.set_x(player.x() - SPEED);
         }
-        if (bn::keypad::right_held())
-        {
+        if (bn::keypad::right_held()) {
             player.set_x(player.x() + SPEED);
         }
-        if (bn::keypad::up_held())
-        {
+        if (bn::keypad::up_held()) {
             player.set_y(player.y() - SPEED);
         }
-        if (bn::keypad::down_held())
-        {
+        if (bn::keypad::down_held()) {
             player.set_y(player.y() + SPEED);
         }
-        if(bn::keypad::start_pressed()) {
+        
+        // Resets the game
+        if (bn::keypad::start_pressed()) {
             player.set_x(PLAYER_X);
             player.set_y(PLAYER_Y);
             treasure.set_x(TREASURE_X);
             treasure.set_y(TREASURE_Y);
             score = 0;
+            aPressed = 0;
         }
-        
 
+        // Adds a speed boost
+        if (bn::keypad::a_pressed() && aPressed != 3) {
+            aPressed++;
+            timer = 0;
+            while (timer != 3) {
+                if (bn::keypad::left_held()) {
+                    player.set_x(player.x() - BOOST);
+                }
+                if (bn::keypad::right_held()) {
+                    player.set_x(player.x() + BOOST);
+                }
+                if (bn::keypad::up_held()) {
+                    player.set_y(player.y() - BOOST);
+                }
+                if (bn::keypad::down_held()) {
+                    player.set_y(player.y() + BOOST);
+                }
+                timer++;
+            }
+        }
+            
         // The bounding boxes of the player and treasure, snapped to integer pixels
         bn::rect player_rect = bn::rect(player.x().round_integer(),
                                         player.y().round_integer(),
@@ -110,6 +136,22 @@ int main()
             treasure.set_position(new_x, new_y);
 
             score++;
+        }
+
+        if (player_rect.x() == MIN_X) {
+            player.set_x(MAX_X);
+        }
+
+        if (player_rect.x() == MAX_X) {
+            player.set_x(MIN_X);
+        }
+
+        if (player_rect.y() == MIN_Y) {
+            player.set_y(MAX_Y);
+        }
+
+        if (player_rect.y() == MAX_Y) {
+            player.set_y(MIN_Y);
         }
 
         // Update score display

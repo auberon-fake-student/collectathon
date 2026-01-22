@@ -19,10 +19,15 @@ A place to write your findings and plans
 14. Line 100: A randomizer for the location of the yellow circle after the display updates.
 
 ## Planning required changes
-1. At Line 17, we can change the fixed speed integer to change the speed of the player.
-2. Since there's no code the background color, we'll implement it ourselves in the main file.
+1. We can change the fixed speed variable to a different integer.
+2. Since there's no code for the background color, we'll implement it ourselves in the main file.
 3. Make new static constexpr int variables for the x and y coordinates of the player and treasure
    and add them in the parentheses of the bn::sprite_ptr variables.
+4. Add an if statement for when the start button is pressed. Set the x and y coordinates to the
+   previously added x and y integer variables we added in #3.
+5. Add if statements for when the player intersects a full bound of a side of the screen, they'll
+   appear on the opposite side of the screen (For example, if the player reaches the top of the screen, they'll appear at the bottom of the screen).
+6. 
 
 ## Brainstorming game ideas
 
