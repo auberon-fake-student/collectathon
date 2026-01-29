@@ -12,7 +12,7 @@
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
 #include "common_fixed_8x16_font.h"
-#include "bn_sprite_items_rock.h"
+#include "bn_sprite_items_obstacle.h"
 #include <bn_backdrop.h>
 #include <bn_color.h>
 
@@ -49,6 +49,13 @@ static constexpr int PLAYER_Y = 0;
 static constexpr int TREASURE_X = 50;
 static constexpr int TREASURE_Y = 0;
 
+// Obstacles location
+static constexpr int OBSTACLE1_X = 0;
+static constexpr int OBSTACLE1_Y = -20;
+
+static constexpr int OBSTACLE2_X = 0;
+static constexpr int OBSTACLE2_Y = 20;
+
 int main()
 {
     bn::core::init();
@@ -66,6 +73,8 @@ int main()
 
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(PLAYER_X, PLAYER_Y);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(TREASURE_X, TREASURE_Y);
+    bn::sprite_ptr rock1 = bn::sprite_items::obstacle.create_sprite(OBSTACLE1_X, OBSTACLE1_Y);
+    bn::sprite_ptr rock2 = bn::sprite_items::obstacle.create_sprite(OBSTACLE2_X, OBSTACLE2_Y);
 
     // For the speed boost
     int timer = 0;
