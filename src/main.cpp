@@ -73,12 +73,18 @@ int main()
     while (true)
     {
 
+        // Change background color to red
         if (bn::keypad::l_pressed()) {
-             bn::backdrop::set_color(bn::color(31, 0, 0));
+            bn::backdrop::set_color(bn::color(31, 0, 0));
         }
 
+        // Change background color to blue
         if (bn::keypad::r_pressed()) {
-             bn::backdrop::set_color(bn::color(0, 0, 31));
+            bn::backdrop::set_color(bn::color(0, 0, 31));
+        }
+
+        if (bn::keypad::l_pressed() && bn::keypad::r_pressed()) {
+            bn::backdrop::set_color(bn::color(10, 10, 22));
         }
 
         if (bn::keypad::a_pressed() && aPressed != 3) {

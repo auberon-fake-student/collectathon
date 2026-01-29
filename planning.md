@@ -33,6 +33,15 @@ A place to write your findings and plans
    In the if statement, increment the aPressed variable by 1. Then add a while loop in the if statement that'll keep going until the timer variable equals 5. In the while loop, increment the timer variable and create another d-pad code that replaces the SPEED variable with a newly created BOOST variable to change the speed of the player, aka the speed boost. Once the timer reaches 5, revert the timer back to 0. Finally, put the d-pad for the original speed in a if statement for when the timer equals 0 so that the boosted speed and original speed overlap each other.
 
 ## Brainstorming game ideas
+1. Press L or R buttons to change the background color. L for red and R for blue.
+2. Press B to randomize the location of the treasure again, but you'll minus the score
+   by 1 if you do.
+3. Add new sprites that'll represent the obstacle.
 
 ## Plan for implementing game
+1. if statements when l and r buttons pressed for the background color.
+2. if statement when b button pressed for randomizing the treasure location again. Similar to the
+   code for when the player intersects the treasure.
+3. Create the obstacle sprites, give it default locations, and make their location randomized for
+   every score update.
 
