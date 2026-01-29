@@ -80,7 +80,7 @@ int main()
         if (bn::keypad::r_pressed()) {
              bn::backdrop::set_color(bn::color(0, 0, 31));
         }
-        
+
         if (bn::keypad::a_pressed() && aPressed != 3) {
             aPressed++;
             while (timer != 5) {
@@ -146,6 +146,17 @@ int main()
             treasure.set_position(new_x, new_y);
 
             score++;
+        }
+
+        // When user wants to reset level
+        if (bn::keypad::b_pressed())
+        {
+            // Jump to any random point in the screen
+            int new_x = rng.get_int(MIN_X, MAX_X);
+            int new_y = rng.get_int(MIN_Y, MAX_Y);
+            treasure.set_position(new_x, new_y);
+
+            score--;
         }
 
         if (player_rect.x() == MIN_X) {
