@@ -228,7 +228,20 @@ int main()
             }
             obstacle2.set_position(new_x_3, new_y_3);
 
-            score-=3;
+            // When score reaches 0 below after obstacle hit then reset the game
+            if (score-- == 0) {
+                player.set_x(PLAYER_X);
+                player.set_y(PLAYER_Y);
+                treasure.set_x(TREASURE_X);
+                treasure.set_y(TREASURE_Y);
+                obstacle1.set_x(OBSTACLE1_X);
+                obstacle1.set_y(OBSTACLE1_Y);
+                obstacle2.set_x(OBSTACLE2_X);
+                obstacle2.set_y(OBSTACLE2_Y);
+
+                score = 0;
+                aPressed = 0;
+            }
         }
 
         // When player reaches the max boundaries
