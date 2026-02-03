@@ -12,13 +12,26 @@
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
 #include "common_fixed_8x16_font.h"
+#include "bn_sprite_items_obstacle.h"
+#include <bn_backdrop.h>
+#include <bn_color.h>
+
+#include <bn_music.h>
+#include "bn_music_items.h"
+#include "bn_sound_items.h"
+
+
 
 // Pixels / Frame player moves at
-static constexpr bn::fixed SPEED = 1;
+static constexpr bn::fixed SPEED = 2;
+
+// Pixels / Frame player moves at with speed boost
+static constexpr bn::fixed BOOST = 4;
 
 // Width and height of the the player and treasure bounding boxes
 static constexpr bn::size PLAYER_SIZE = {8, 8};
 static constexpr bn::size TREASURE_SIZE = {8, 8};
+static constexpr bn::size OBSTACLE_SIZE = {8, 8};
 
 // Full bounds of the screen
 static constexpr int MIN_Y = -bn::display::height() / 2;
@@ -33,11 +46,35 @@ static constexpr int MAX_SCORE_CHARS = 11;
 static constexpr int SCORE_X = 70;
 static constexpr int SCORE_Y = -70;
 
+// Player location
+static constexpr int PLAYER_X = -50;
+static constexpr int PLAYER_Y = 0;
+
+// Treasure location
+static constexpr int TREASURE_X = 50;
+static constexpr int TREASURE_Y = 0;
+
+// Obstacles location
+static constexpr int OBSTACLE1_X = 0;
+static constexpr int OBSTACLE1_Y = -20;
+
+static constexpr int OBSTACLE2_X = 0;
+static constexpr int OBSTACLE2_Y = 20;
+
 int main()
 {
     bn::core::init();
 
+    // Plays music 
+    bn::music_items::music_4ch.play();
+    bn::music::set_volume(0.1);
+    bool music_paused = false;
+
     bn::random rng = bn::random();
+    bn::random obstacle_rng = bn::random();
+
+    // Background Color
+    bn::backdrop::set_color(bn::color(10, 10, 22));
 
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
@@ -45,29 +82,80 @@ int main()
 
     int score = 0;
 
-    bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
-    bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
+    bn::sprite_ptr player = bn::sprite_items::square.create_sprite(PLAYER_X, PLAYER_Y);
+    bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(TREASURE_X, TREASURE_Y);
+    bn::sprite_ptr obstacle1 = bn::sprite_items::obstacle.create_sprite(OBSTACLE1_X, OBSTACLE1_Y);
+    bn::sprite_ptr obstacle2 = bn::sprite_items::obstacle.create_sprite(OBSTACLE2_X, OBSTACLE2_Y);
+
+    // For the speed boost
+    int timer = 0;
+    int aPressed = 0;
 
     while (true)
     {
-        // Move player with d-pad
-        if (bn::keypad::left_held())
-        {
-            player.set_x(player.x() - SPEED);
-        }
-        if (bn::keypad::right_held())
-        {
-            player.set_x(player.x() + SPEED);
-        }
-        if (bn::keypad::up_held())
-        {
-            player.set_y(player.y() - SPEED);
-        }
-        if (bn::keypad::down_held())
-        {
-            player.set_y(player.y() + SPEED);
+
+        // Change background color to red
+        if (bn::keypad::l_pressed()) {
+            bn::backdrop::set_color(bn::color(31, 0, 0));
         }
 
+        // Change background color to blue
+        if (bn::keypad::r_pressed()) {
+            bn::backdrop::set_color(bn::color(0, 0, 31));
+        }
+
+        if (bn::keypad::l_pressed() && bn::keypad::r_pressed()) {
+            bn::backdrop::set_color(bn::color(10, 10, 22));
+        }
+
+        // Press the a button for the speed boost
+        if (bn::keypad::a_pressed() && aPressed != 3) {
+            aPressed++;
+            while (timer != 5) {
+                timer++;
+                if (bn::keypad::left_held()) {
+                    player.set_x(player.x() - BOOST);
+                }
+                if (bn::keypad::right_held()) {
+                    player.set_x(player.x() + BOOST);
+                }
+                if (bn::keypad::up_held()) {
+                    player.set_y(player.y() - BOOST);
+                }
+                if (bn::keypad::down_held()) {
+                    player.set_y(player.y() + BOOST);
+                }
+            }
+            timer = 0;
+        }
+
+        // Press the b button to pause or resume the music
+        if (bn::keypad::b_pressed()) {
+            if (music_paused) {
+                bn::music::resume();
+                music_paused = false;
+            } else {
+                bn::music::pause();
+                music_paused = true;
+            }
+        }
+
+        if (timer == 0) {
+            // Move with the d-pad
+            if (bn::keypad::left_held()) {
+                player.set_x(player.x() - SPEED);
+            }
+            if (bn::keypad::right_held()) {
+                player.set_x(player.x() + SPEED);
+            }
+            if (bn::keypad::up_held()) {
+                player.set_y(player.y() - SPEED);
+            }
+            if (bn::keypad::down_held()) {
+                player.set_y(player.y() + SPEED);
+            }
+        }
+            
         // The bounding boxes of the player and treasure, snapped to integer pixels
         bn::rect player_rect = bn::rect(player.x().round_integer(),
                                         player.y().round_integer(),
@@ -77,16 +165,125 @@ int main()
                                           treasure.y().round_integer(),
                                           TREASURE_SIZE.width(),
                                           TREASURE_SIZE.height());
+        bn::rect obstacle1_rect = bn::rect(obstacle1.x().round_integer(),
+                                          obstacle1.y().round_integer(),
+                                          OBSTACLE_SIZE.width(),
+                                          OBSTACLE_SIZE.height());
+        bn::rect obstacle2_rect = bn::rect(obstacle2.x().round_integer(),
+                                          obstacle2.y().round_integer(),
+                                          OBSTACLE_SIZE.width(),
+                                          OBSTACLE_SIZE.height());
 
-        // If the bounding boxes overlap, set the treasure to a new location an increase score
+        // If the bounding boxes overlap, set the treasure and obstacles to a new location 
+        // and increase score
         if (player_rect.intersects(treasure_rect))
         {
+            // Sound plays
+            bn::sound_items::temp_pickup.play();
+            
             // Jump to any random point in the screen
-            int new_x = rng.get_int(MIN_X, MAX_X);
-            int new_y = rng.get_int(MIN_Y, MAX_Y);
+            int new_x = rng.get_int(MIN_X / 2, MAX_X / 2);
+            int new_y = rng.get_int(MIN_Y / 2, MAX_Y / 2);
             treasure.set_position(new_x, new_y);
 
+            int new_x_2 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+            int new_y_2 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            while (new_x_2 == new_x && new_y_2 == new_y) {
+                obstacle_rng.update();
+                new_x_2 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+                new_y_2 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            }
+            obstacle1.set_position(new_x_2, new_y_2);
+
+            int new_x_3 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+            int new_y_3 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            while (new_x_3 == new_x && new_y_3 == new_y 
+                && new_x_3 == new_x_2 && new_y_3 == new_y_2) {
+                obstacle_rng.update();
+                new_x_3 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+                new_y_3 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            }
+            obstacle2.set_position(new_x_3, new_y_3);
+
             score++;
+        }
+
+        // If the player overlaps with an obstacle set the treasure and obstacles to a new location 
+        // and decrease score
+        if (player_rect.intersects(obstacle1_rect) || player_rect.intersects(obstacle2_rect)) {
+
+            // Plays sound when user hits obstacle
+            bn::sound_items::sound_hit.play();
+
+            int new_x = rng.get_int(MIN_X / 2, MAX_X / 2);
+            int new_y = rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            treasure.set_position(new_x, new_y);
+
+            int new_x_2 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+            int new_y_2 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            while (new_x_2 == new_x && new_y_2 == new_y) {
+                obstacle_rng.update();
+                new_x_2 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+                new_y_2 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            }
+            obstacle1.set_position(new_x_2, new_y_2);
+
+            int new_x_3 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+            int new_y_3 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            while (new_x_3 == new_x && new_y_3 == new_y 
+                && new_x_3 == new_x_2 && new_y_3 == new_y_2) {
+                obstacle_rng.update();
+                new_x_3 = obstacle_rng.get_int(MIN_X / 2, MAX_X / 2);
+                new_y_3 = obstacle_rng.get_int(MIN_Y / 2, MAX_Y / 2);
+            }
+            obstacle2.set_position(new_x_3, new_y_3);
+
+            // When score reaches 0 below after obstacle hit then reset the game
+            if (score-- == 0) {
+                player.set_x(PLAYER_X);
+                player.set_y(PLAYER_Y);
+                treasure.set_x(TREASURE_X);
+                treasure.set_y(TREASURE_Y);
+                obstacle1.set_x(OBSTACLE1_X);
+                obstacle1.set_y(OBSTACLE1_Y);
+                obstacle2.set_x(OBSTACLE2_X);
+                obstacle2.set_y(OBSTACLE2_Y);
+
+                score = 0;
+                aPressed = 0;
+            }
+        }
+
+        // When player reaches the max boundaries of the screen
+        if (player_rect.x() == MIN_X) {
+            player.set_x(MAX_X);
+        }
+
+        if (player_rect.x() == MAX_X) {
+            player.set_x(MIN_X);
+        }
+
+        if (player_rect.y() == MIN_Y) {
+            player.set_y(MAX_Y);
+        }
+
+        if (player_rect.y() == MAX_Y) {
+            player.set_y(MIN_Y);
+        }
+
+        // Press the start button to manually reset the game
+        if (bn::keypad::start_pressed()) {
+            player.set_x(PLAYER_X);
+            player.set_y(PLAYER_Y);
+            treasure.set_x(TREASURE_X);
+            treasure.set_y(TREASURE_Y);
+            obstacle1.set_x(OBSTACLE1_X);
+            obstacle1.set_y(OBSTACLE1_Y);
+            obstacle2.set_x(OBSTACLE2_X);
+            obstacle2.set_y(OBSTACLE2_Y);
+
+            score = 0;
+            aPressed = 0;
         }
 
         // Update score display
@@ -98,6 +295,7 @@ int main()
 
         // Update RNG seed every frame so we don't get the same sequence of positions every time
         rng.update();
+        obstacle_rng.update();
 
         bn::core::update();
     }
