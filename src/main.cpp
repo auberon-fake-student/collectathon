@@ -65,7 +65,7 @@ int main()
     bn::core::init();
 
     // Plays music 
-    bn::music_items::afternoon_break_1.play();
+    bn::music_items::music_4ch.play();
 
     bn::random rng = bn::random();
     bn::random obstacle_rng = bn::random();
