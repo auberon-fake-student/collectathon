@@ -108,6 +108,7 @@ int main()
             bn::backdrop::set_color(bn::color(10, 10, 22));
         }
 
+        // Press the a button for the speed boost
         if (bn::keypad::a_pressed() && aPressed != 3) {
             aPressed++;
             while (timer != 5) {
@@ -128,6 +129,7 @@ int main()
             timer = 0;
         }
 
+        // Press the b button to pause or resume the music
         if (bn::keypad::b_pressed()) {
             if (music_paused) {
                 bn::music::resume();
@@ -172,7 +174,8 @@ int main()
                                           OBSTACLE_SIZE.width(),
                                           OBSTACLE_SIZE.height());
 
-        // If the bounding boxes overlap, set the treasure to a new location an increase score
+        // If the bounding boxes overlap, set the treasure and obstacles to a new location 
+        // and increase score
         if (player_rect.intersects(treasure_rect))
         {
             // Sound plays
@@ -205,6 +208,8 @@ int main()
             score++;
         }
 
+        // If the player overlaps with an obstacle set the treasure and obstacles to a new location 
+        // and decrease score
         if (player_rect.intersects(obstacle1_rect) || player_rect.intersects(obstacle2_rect)) {
 
             // Plays sound when user hits obstacle
@@ -249,7 +254,7 @@ int main()
             }
         }
 
-        // When player reaches the max boundaries
+        // When player reaches the max boundaries of the screen
         if (player_rect.x() == MIN_X) {
             player.set_x(MAX_X);
         }
@@ -266,7 +271,7 @@ int main()
             player.set_y(MIN_Y);
         }
 
-        // Resets the game
+        // Press the start button to manually reset the game
         if (bn::keypad::start_pressed()) {
             player.set_x(PLAYER_X);
             player.set_y(PLAYER_Y);
