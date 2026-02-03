@@ -17,7 +17,7 @@
 #include <bn_color.h>
 
 #include "bn_music_items.h"
-// #include "bn_sound_item._ file-name.h"
+#include "bn_sound_items.h"
 
 
 
@@ -162,6 +162,8 @@ int main()
         // If the bounding boxes overlap, set the treasure to a new location an increase score
         if (player_rect.intersects(treasure_rect))
         {
+            // Sound plays
+            bn::sound_items::temp_pickup.play();
             // Jump to any random point in the screen
             int new_x = rng.get_int(MIN_X / 2, MAX_X / 2);
             int new_y = rng.get_int(MIN_Y / 2, MAX_Y / 2);
